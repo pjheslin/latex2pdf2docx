@@ -42,6 +42,8 @@ What makes this work is the file latex2pdf2docx.sty.  This file redefines many c
 
         pandoc -o myfile.docx myfile.tex
 
+7.  Use Word to perform final tweaks of the appearance of the Word file and fix table layouts, etc.
+
 ## To-do
 
 * Math mode

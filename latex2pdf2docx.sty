@@ -1,23 +1,5 @@
-%% To use:
-
-% Fix fontloading commands in Latex source so that the document uses one unicode font only, without old-style figures or ligatures.  E.g.:
-% \setromanfont[Mapping=tex-text,Ligatures=NoCommon]{Adobe Garamond Pro}
-
-% Run Latex on source, including this style file
-
-% Look over the results and try to identify major problems.  Fix and re-run until the PDF looks OK (as Latex source).
-
-% Extract the text from the PDF output by opening the PDF in a reader.  Select all, then copy and paste into a text editor. (As a PDF reader, Preview.app works well for this; pdftotext worked well on linux, but not on Mac)
-
-% Once the text has been pasted as plain text into an editor, save it as a new file with a .tex extension (but don't run Latex on it).
-
-% Run the command-line tool fmt over the file, because pandoc doesn't like massive lines.
-
-% Run Pandoc to convert the .tex file to a .docx file.
-
-% Tweak appearance and fix tables, description environments, etc.
-
-%% Todo: add Gentium
+%% How to use: https://github.com/pjheslin/latex2pdf2docx
+%% License: GPL v. 3
 
 \makeatletter
 
@@ -48,29 +30,6 @@
 % remove all headers/footers
 \pagestyle{empty}
 \let\ps@plain\ps@empty
-
-% use endnotes
-%\usepackage{endnotes}
-%\let\origendnote\endnote
-%\renewcommand{\endnote}[1]{\textbackslash footnotemark\{\origendnote{#1}\}}
-%\makeatletter
-%\let\orig@endnotetext\@endnotetext
-%\renewcommand{\@endnotetext}[1]{\orig@endnotetext{\textbackslash
-%    begin\{footnotetext\}#1\textbackslash end\{footnotetext\}}}
-%\let\footnote=\endnote
-%\def\enoteheading{}
-%\def\enoteformat{}
-%\def\enotesize{}
-%\def\makeenmark{\theenmark}
-%\AtEndDocument{
-%     \clearpage
-%     NOTES
-%     \begingroup
-%     \theendnotes
-%     \endgroup
-
-%     \textbackslash end\{document\}
-%}
 
 \long\def\@footnotetext#1{\textbackslash footnote\{#1\}}
 %%\def\@footnotemark{}
@@ -161,7 +120,7 @@
 
 %\usepackage{letltxmacro}
 
-% Sectioning commands 
+% Sectioning commands
 \renewcommand{\section}[1]{\textbackslash section\{#1\}}
 \renewcommand{\subsection}[1]{\textbackslash subsection\{#1\}}
 \renewcommand{\subsubsection}[1]{\textbackslash subsubsection\{#1\}}
