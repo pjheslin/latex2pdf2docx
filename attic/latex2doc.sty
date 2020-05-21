@@ -1,0 +1,145 @@
+% latex2doc.sty
+
+% This package exists to allow a file to be run through latex to
+% resolve all bibliographical entries, footnotes, etc., but to
+% preserve enough latex markup in the output to permit the text
+% subsequently extracted from the typeset file to be run through a
+% converter that takes latex semantic markup and converts it to
+% another form (e.g. MS Word).
+
+% The main text file should disable all ligatures, old-style figures,
+% etc. -- all sorts of things that may get mapped to the PUA
+
+\makeatletter
+
+\AtBeginDocument{\textbackslash documentclass\{article\}
+\textbackslash usepackage[utf8x]\{inputenc\}
+\textbackslash setcounter\{secnumdepth\}\{-1\}
+}
+
+
+% For xetex: suppress ligatures
+%\RequirePackage{ifxetex}
+%\ifxetex
+%\RequirePackage{fontspec}
+%\defaultfontfeatures{Ligatures=NoCommon,Numbers=Lining,Letters=Normal}
+%\setromanfont[Mapping=tex-text]{Minion Pro}
+%\fi
+
+% suppress hyphenation, headers and footers
+
+\usepackage[none]{hyphenat}
+\raggedright
+\pagestyle{empty}
+
+% Turn footnotes to endnotes.  The problem is not so much footnotes
+% split across pages, which can be fixed, as environments in the main
+% text interrupted by footnotes at the bottom of the page
+\usepackage{endnotes}
+\let\origendnote\endnote
+\renewcommand{\endnote}[1]{\textbackslash footnotemark\{\origendnote{#1}\}}
+\makeatletter
+\let\orig@endnotetext\@endnotetext
+\renewcommand{\@endnotetext}[1]{\orig@endnotetext{\textbackslash
+    begin\{footnotetext\}#1\textbackslash end\{footnotetext\}}}
+\let\footnote=\endnote
+\def\enoteheading{}
+\def\enoteformat{}
+\def\enotesize{}
+\AtEndDocument{
+     \clearpage
+     NOTES
+     \begingroup
+     \theendnotes
+     \endgroup
+}
+
+% Use \thanks for a non-numbered footnote, which we cannot deal with
+% automatically.  This needs to be manually converted by inserting it
+% as a non-numbered footnote in OOwriter or whatever
+\renewcommand{\thanks}[1]{---FIXME--- #1}
+
+% From D. Kastrup via TeX FAQ -- preserve \par
+\let\mypkg@@everypar\everypar
+\newtoks\mypkg@everypar
+\mypkg@everypar\expandafter{\the\everypar}
+\mypkg@@everypar{\mypkgs@ownstuff\the\mypkg@everypar}
+\def\mypkgs@ownstuff{%
+  \textbackslash par %
+}
+\let\everypar\mypkg@everypar
+
+% Preserve all environments
+\let\origbegin\begin
+\renewcommand{\begin}[1]{\origbegin{#1}\textbackslash begin\{#1\}}
+\let\origend\end
+\renewcommand{\end}[1]{\textbackslash end\{#1\}\origend{#1}}
+
+% Preserve font commands
+\let\origemph\emph
+\renewcommand{\emph}[1]{\textbackslash emph\{\origemph{#1}\}}
+\let\origtextit\textit
+\renewcommand{\textit}[1]{\textbackslash textit\{\origtextit{#1}\}}
+\let\origtextbf\textbf
+\renewcommand{\textbf}[1]{\textbackslash textbf\{\origtextbf{#1}\}}
+\let\origtexttt\texttt
+\renewcommand{\texttt}[1]{\textbackslash texttt\{\origtexttt{#1}\}}
+\let\origtextrm\textrm
+\renewcommand{\textrm}[1]{\textbackslash textrm\{\origtextrm{#1}\}}
+\let\origtextmd\textmd
+\renewcommand{\textmd}[1]{\textbackslash textmd\{\origtextmd{#1}\}}
+\let\origtextup\textup
+\renewcommand{\textup}[1]{\textbackslash textup\{\origtextup{#1}\}}
+\let\origtextsl\textsl
+\renewcommand{\textsl}[1]{\textbackslash textsl\{\origtextsl{#1}\}}
+\let\origtextsf\textsf
+\renewcommand{\textsf}[1]{\textbackslash textsf\{\origtextsf{#1}\}}
+\let\origtextnormal\textnormal
+\renewcommand{\textnormal}[1]{\textbackslash textnormal\{\origtextnormal{#1}\}}
+
+% This one is different -- we disable sc output, since Unicode
+% generally changes these glyphs and uses the PUA.
+\let\origtextsc\textsc
+\renewcommand{\textsc}[1]{\textbackslash textsc\{#1\}}
+
+
+
+% Sectioning commands
+\let\origsection\section
+\renewcommand{\section}[1]{\textbackslash section\{#1\}}
+\let\origsubsection\subsection
+\renewcommand{\subsection}[1]{\textbackslash subsection\{#1\}}
+\let\origsubsubsection\subsubsection
+\renewcommand{\subsubsection}[1]{\textbackslash subsubsection\{#1\}}
+\let\origparagraph\paragraph
+\renewcommand{\paragraph}[1]{\textbackslash paragraph\{#1\}}
+\let\origsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\textbackslash subparagraph\{#1\}}
+
+%\let\origchapter\chapter
+%\renewcommand{\chapter}[1]{\textbackslash chapter\{#1\}}
+%\let\origpart\part
+%\renewcommand{\part}[1]{\textbackslash part\{#1\}}
+
+\let\origitem\item
+\renewcommand{\item}[1]{\textbackslash item #1}
+
+
+% remove figures
+\renewcommand{\makebox}[1][\relax]%
+             {}
+\renewcommand{\includegraphics}[1][\relax]%
+             {}
+\renewcommand{\caption}[1]%
+             {}
+
+
+\renewcommand{\dots}{…}
+\renewcommand{\ldots}{…}
+
+
+\let\origdblbslash\\
+\renewcommand{\\}{\textbackslash\textbackslash\origdblbslash}
+
+
+\makeatother
