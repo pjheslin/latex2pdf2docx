@@ -1,0 +1,203 @@
+%% To use:
+
+% Fix fontloading commands in Latex source so that the document uses one unicode font only, without old-style figures or ligatures.  E.g.:
+% \setromanfont[Mapping=tex-text,Ligatures=NoCommon]{Adobe Garamond Pro}
+
+% Run Latex on source, including this style file
+
+% Look over the results and try to identify major problems.  Fix and re-run until the PDF looks OK (as Latex source).
+
+% Extract the text from the PDF output by opening the PDF in a reader.  Select all, then copy and paste into a text editor. (As a PDF reader, Preview.app works well for this; pdftotext worked well on linux, but not on Mac)
+
+% Once the text has been pasted as plain text into an editor, save it as a new file with a .tex extension (but don't run Latex on it).
+
+% Run the command-line tool fmt over the file, because pandoc doesn't like massive lines.
+
+% Run Pandoc to convert the .tex file to a .docx file.
+
+% Tweak appearance and fix tables, description environments, etc.
+
+%% Todo: add Gentium
+
+\makeatletter
+
+% minimal preamble
+\AtBeginDocument{\textbackslash documentclass\{article\}
+\textbackslash usepackage[utf8x]\{inputenc\}
+\textbackslash setcounter\{secnumdepth\}\{-1\}
+\textbackslash begin\{document\}
+
+% make LaTeX treat tilde (~) like a normal character
+\catcode`~=11
+% but this can cause problems if ~ follows a command!
+}
+
+\catcode`~=11
+\global\def\null~~~~{~~~~}
+\global\def\null~~~~~~~~{~~~~~~~~}
+\catcode`~=13 % revert back to treating tilde (~) as an active character
+
+\AtEndDocument{\textbackslash end\{document\}}
+
+
+% disable hyphenation
+\usepackage[none]{hyphenat}
+\raggedright
+\raggedbottom
+
+% remove all headers/footers
+\pagestyle{empty}
+\let\ps@plain\ps@empty
+
+% use endnotes
+%\usepackage{endnotes}
+%\let\origendnote\endnote
+%\renewcommand{\endnote}[1]{\textbackslash footnotemark\{\origendnote{#1}\}}
+%\makeatletter
+%\let\orig@endnotetext\@endnotetext
+%\renewcommand{\@endnotetext}[1]{\orig@endnotetext{\textbackslash
+%    begin\{footnotetext\}#1\textbackslash end\{footnotetext\}}}
+%\let\footnote=\endnote
+%\def\enoteheading{}
+%\def\enoteformat{}
+%\def\enotesize{}
+%\def\makeenmark{\theenmark}
+%\AtEndDocument{
+%     \clearpage
+%     NOTES
+%     \begingroup
+%     \theendnotes
+%     \endgroup
+
+%     \textbackslash end\{document\}
+%}
+
+\long\def\@footnotetext#1{\textbackslash footnote\{#1\}}
+%%\def\@footnotemark{}
+\def\@makefnmark{}
+
+
+% From D. Kastrup via TeX FAQ -- preserve \par
+\let\mypkg@@everypar\everypar
+\newtoks\mypkg@everypar
+\mypkg@everypar\expandafter{\the\everypar}
+\mypkg@@everypar{\mypkgs@ownstuff\the\mypkg@everypar}
+\def\mypkgs@ownstuff{%
+  \textbackslash par %
+}
+\let\everypar\mypkg@everypar
+
+% Misc environments to preserve
+
+% NB. simply redefining \begin and \end does not work, because this
+% does not play well with etoolbox, which is used by e.g. biblatex.
+% We cannot redefine \item globally, since it is widely used
+% internally, e.g. in quote enviroments.
+
+\usepackage{etoolbox}
+\BeforeBeginEnvironment{center}{\textbackslash begin\{center\}}
+\AfterEndEnvironment{center}{\textbackslash end\{center\}}
+
+\BeforeBeginEnvironment{quote}{\textbackslash begin\{quote\}}
+\AfterEndEnvironment{quote}{\textbackslash end\{quote\}}
+
+\BeforeBeginEnvironment{quotation}{\textbackslash begin\{quotation\}}
+\AfterEndEnvironment{quotation}{\textbackslash end\{quotation\}}
+
+\BeforeBeginEnvironment{verse}{\textbackslash begin\{verse\}}
+\AfterEndEnvironment{verse}{\textbackslash end\{verse\}}
+
+\BeforeBeginEnvironment{description}{\textbackslash begin\{description\}}
+\AfterEndEnvironment{description}{\textbackslash end\{description\}}
+\AtBeginEnvironment{description}{\apptocmd{\item}{\textbackslash item\ }{}{}}
+
+\BeforeBeginEnvironment{itemize}{\textbackslash begin\{itemize\}}
+\AfterEndEnvironment{itemize}{\textbackslash end\{itemize\}}
+\AtBeginEnvironment{itemize}{\apptocmd{\item}{\textbackslash item\ }{}{}}
+
+\BeforeBeginEnvironment{enumerate}{\textbackslash begin\{enumerate\}}
+\AfterEndEnvironment{enumerate}{\textbackslash end\{enumerate\}}
+\AtBeginEnvironment{enumerate}{\apptocmd{\item}{\textbackslash item\ }{}{}}
+
+% Remove bullets and numbers to avoid reduplication
+\usepackage{enumitem}
+\setlist[itemize,1]{label={}}
+\setlist[enumerate,1]{label={}}
+
+% Remove figures/tables and captions, but leave labels.  We must be careful
+% not to redefine \caption, because it is responsible for writing the
+% writing out the label, which we need for cross-refs.
+
+\AtBeginEnvironment{figure}{\def\@makecaption#1#2{}\renewcommand{\includegraphics}[2][]{}}
+\AtBeginEnvironment{table}{\def\@makecaption#1#2{}\renewcommand{\includegraphics}[2][]{}}
+
+
+% Try to deal with tabular data -- Pandoc claims to support it, but I
+% have not had much luck with it so far.
+% Todo: investigate bug report claiming that this breaks when "&" is used in a bibliography entry.
+\catcode`&=11 % make LaTeX treat & like a normal character
+\def\@myampersand{&}
+\renewcommand{\&}{{\mainfont \@myampersand}}
+\renewcommand{\tabular}[2][]{\begingroup\def\\{\textbackslash\textbackslash}\textbackslash begin\{tabular\}[#1]\{#2\}}
+\renewcommand{\endtabular}{\endgroup\textbackslash end\{tabular\}}
+
+
+% Font commands.  We do not try to preserve the formatting in the
+% output, since it can interfere with extracting text,
+% e.g. introducing spurious spaces.
+\renewcommand{\emph}[1]{\textbackslash emph\{#1\}}
+\renewcommand{\textit}[1]{\textbackslash textit\{#1\}}
+\renewcommand{\textbf}[1]{\textbackslash textbf\{#1\}}
+\renewcommand{\texttt}[1]{\textbackslash texttt\{#1\}}
+\renewcommand{\textrm}[1]{\textbackslash textrm\{#1\}}
+\renewcommand{\textmd}[1]{\textbackslash textmd\{#1\}}
+\renewcommand{\textup}[1]{\textbackslash textup\{#1\}}
+\renewcommand{\textsl}[1]{\textbackslash textsl\{#1\}}
+\renewcommand{\textsf}[1]{\textbackslash textsf\{#1\}}
+\renewcommand{\textnormal}[1]{\textbackslash textnormal\{\origtextnormal{#1}\}}
+% Especially important to disable sc output, since Unicode generally changes
+% these glyphs and uses the PUA.
+\renewcommand{\textsc}[1]{\textbackslash textsc\{\MakeUppercase{#1}\}}
+
+
+%\usepackage{letltxmacro}
+
+% Sectioning commands 
+\renewcommand{\section}[1]{\textbackslash section\{#1\}}
+\renewcommand{\subsection}[1]{\textbackslash subsection\{#1\}}
+\renewcommand{\subsubsection}[1]{\textbackslash subsubsection\{#1\}}
+\renewcommand{\paragraph}[1]{\textbackslash paragraph\{#1\}}
+\renewcommand{\subparagraph}[1]{\textbackslash subparagraph\{#1\}}
+\renewcommand{\chapter}[1]{\textbackslash chapter\{#1\}}
+\renewcommand{\part}[1]{\textbackslash part\{#1\}}
+
+
+\renewcommand{\dots}{…}
+\renewcommand{\ldots}{…}
+
+% For linebreaks in verse, etc.  We set the font, because some greek
+% fonts don't have the backslash
+\renewcommand{\\}{{\mainfont\textbackslash\textbackslash}}
+
+
+\renewcommand{\%}{{\mainfont\textbackslash\@percentchar}}
+\renewcommand{\_}{{\mainfont\textbackslash\textunderscore}}
+
+
+% We could put a newline in the output to make it more legible, but
+% that gives lots of spurious \pars in the output.
+% \let\origdblbslash\\
+% \renewcommand{\\}{{\mainfont\textbackslash\textbackslash\origdblbslash}}
+
+% The default biblatex dash for repeated authors causes problems with
+% copying text from PDF with Preview.app
+\renewcommand*{\bibnamedash}{\textemdash\space}
+
+% Get rid of page numbers and dotted leaders for lists of figures, etc.
+\renewcommand{\numberline}[2]{
+  \textbackslash textbf\{#1.\}   #2}
+\AtEndPreamble{\renewcommand\contentsline[4]{\par
+    \textbackslash textbf\{\MakeUppercase#1\}  #2}}
+
+
+\makeatother
