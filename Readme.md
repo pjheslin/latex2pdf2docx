@@ -28,7 +28,7 @@ What makes this work is the file latex2pdf2docx.sty.  This file redefines many c
 
      Run LaTeX again to make sure there are no errors or unexpected warnings.
 
-2.  It may help to edit the preamble of your document to comment out formatting that has no hope of being supported by Pandoc. Copy the file `latex2pdf2docx.sty` from this repository to your LaTeX working directory.  Add this line to the start of your preamble:
+2.  It may help to edit the preamble of your document to comment out formatting that has no hope of being supported by Pandoc. Copy the file [latex2pdf2docx.sty](https://raw.githubusercontent.com/pjheslin/latex2pdf2docx/master/latex2pdf2docx.sty) from this repository to your LaTeX working directory.  Add this line to the start of your preamble:
 
         \usepackage{latex2pdf2docx}
 
