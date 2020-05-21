@@ -1,17 +1,18 @@
 %% To use:
 
 % Fix fontloading commands in Latex source so that the document uses one unicode font only, without old-style figures or ligatures.  E.g.:
-% \setromanfont[Mapping=tex-text,Ligatures=NoCommon]{Adobe Garamond Pro}
+% \setmainfont[Mapping=tex-text,Ligatures=NoCommon]{Adobe Garamond Pro} and then \newfontfamily\mymainfont[Mapping=tex-text,Ligatures=NoCommon]{Adobe Garamond Pro}
+
 
 % Run Latex on source, including this style file
 
 % Look over the results and try to identify major problems.  Fix and re-run until the PDF looks OK (as Latex source).
 
-% Extract the text from the PDF output by opening the PDF in a reader.  Select all, then copy and paste into a text editor. (As a PDF reader, Preview.app works well for this; pdftotext worked well on linux, but not on Mac)
+% Extract the text from the PDF output by opening the PDF in a reader.  Select all, then copy and paste into a text editor. (As a PDF reader, Skim for Mac works well for this; pdftotext worked well on linux, but not on Mac)
 
 % Once the text has been pasted as plain text into an editor, save it as a new file with a .tex extension (but don't run Latex on it).
 
-% Run the command-line tool fmt over the file, because pandoc doesn't like massive lines.
+% Possibly run the command-line tool fmt over the file, in case pandoc doesn't like massive lines.
 
 % Run Pandoc to convert the .tex file to a .docx file.
 
@@ -83,7 +84,7 @@
 \mypkg@everypar\expandafter{\the\everypar}
 \mypkg@@everypar{\mypkgs@ownstuff\the\mypkg@everypar}
 \def\mypkgs@ownstuff{%
-  \textbackslash par %
+  \textbackslash par\{\}%
 }
 \let\everypar\mypkg@everypar
 
@@ -104,8 +105,11 @@
 \BeforeBeginEnvironment{quotation}{\textbackslash begin\{quotation\}}
 \AfterEndEnvironment{quotation}{\textbackslash end\{quotation\}}
 
-\BeforeBeginEnvironment{verse}{\textbackslash begin\{verse\}}
-\AfterEndEnvironment{verse}{\textbackslash end\{verse\}}
+%\BeforeBeginEnvironment{verse}{\textbackslash begin\{verse\}}
+%\AfterEndEnvironment{verse}{\textbackslash end\{verse\}}
+\BeforeBeginEnvironment{verse}{\textbackslash begin\{quote\}}
+\AfterEndEnvironment{verse}{\textbackslash end\{quote\}}
+
 
 \BeforeBeginEnvironment{description}{\textbackslash begin\{description\}}
 \AfterEndEnvironment{description}{\textbackslash end\{description\}}
@@ -134,10 +138,9 @@
 
 % Try to deal with tabular data -- Pandoc claims to support it, but I
 % have not had much luck with it so far.
-% Todo: investigate bug report claiming that this breaks when "&" is used in a bibliography entry.
 \catcode`&=11 % make LaTeX treat & like a normal character
 \def\@myampersand{&}
-\renewcommand{\&}{{\mainfont \@myampersand}}
+\renewcommand{\&}{{\mymainfont \@myampersand}}
 \renewcommand{\tabular}[2][]{\begingroup\def\\{\textbackslash\textbackslash}\textbackslash begin\{tabular\}[#1]\{#2\}}
 \renewcommand{\endtabular}{\endgroup\textbackslash end\{tabular\}}
 
@@ -168,7 +171,7 @@
 \renewcommand{\subsubsection}[1]{\textbackslash subsubsection\{#1\}}
 \renewcommand{\paragraph}[1]{\textbackslash paragraph\{#1\}}
 \renewcommand{\subparagraph}[1]{\textbackslash subparagraph\{#1\}}
-\renewcommand{\chapter}[1]{\textbackslash chapter\{#1\}}
+\newcommand{\chapter}[1]{\textbackslash chapter\{#1\}}
 \renewcommand{\part}[1]{\textbackslash part\{#1\}}
 
 
@@ -177,17 +180,17 @@
 
 % For linebreaks in verse, etc.  We set the font, because some greek
 % fonts don't have the backslash
-\renewcommand{\\}{{\mainfont\textbackslash\textbackslash}}
+\renewcommand{\\}{{\mymainfont\textbackslash\textbackslash}}
 
 
-\renewcommand{\%}{{\mainfont\textbackslash\@percentchar}}
-\renewcommand{\_}{{\mainfont\textbackslash\textunderscore}}
+\renewcommand{\%}{{\mymainfont\textbackslash\@percentchar}}
+\renewcommand{\_}{{\mymainfont\textbackslash\textunderscore}}
 
 
 % We could put a newline in the output to make it more legible, but
 % that gives lots of spurious \pars in the output.
 % \let\origdblbslash\\
-% \renewcommand{\\}{{\mainfont\textbackslash\textbackslash\origdblbslash}}
+% \renewcommand{\\}{{\mymainfont\textbackslash\textbackslash\origdblbslash}}
 
 % The default biblatex dash for repeated authors causes problems with
 % copying text from PDF with Preview.app
